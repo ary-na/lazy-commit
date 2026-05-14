@@ -3,6 +3,7 @@
 import OpenAI from "openai";
 import { execSync } from "child_process";
 import * as readline from "readline";
+import chalk from "chalk";
 import { loadConfig, runConfigSetup } from "./config.js";
 
 function getStagedDiff(): string {
@@ -10,7 +11,9 @@ function getStagedDiff(): string {
     const diff = execSync("git diff --staged", { encoding: "utf-8" });
     return diff;
   } catch {
-    console.error("error: not a git repository or git is not installed");
+    console.error(
+      chalk.red("error: not a git repository or git is not installed"),
+    );
     process.exit(1);
   }
 }
@@ -70,25 +73,34 @@ async function main() {
   const diff = getStagedDiff();
 
   if (!diff.trim()) {
-    console.log("no staged changes found. use git add to stage your changes.");
+    console.log(
+      chalk.yellow(
+        "no staged changes found. use git add to stage your changes.",
+      ),
+    );
     process.exit(0);
   }
 
-  console.log("generating commit message...\n");
+  console.log(chalk.dim("generating commit message...\n"));
+
   const commitMessage = await generateCommitMessage(diff);
 
-  console.log(`suggested commit message:\n\n  ${commitMessage}\n`);
+  console.log(chalk.bold("suggested commit message:\n"));
+  console.log(chalk.cyan(`  ${commitMessage}\n`));
 
-  const answer = await prompt("use this message? (y/n): ");
+  const answer = await prompt(chalk.white("use this message? (y/n): "));
 
   if (answer.toLowerCase() === "y") {
     execSync(`git commit -m "${commitMessage.replace(/"/g, '\\"')}"`, {
       stdio: "inherit",
     });
-    console.log("\ncommitted!");
+    console.log(chalk.green("\ncommitted!"));
   } else {
-    console.log("commit cancelled.");
+    console.log(chalk.red("\ncommit cancelled."));
   }
 }
 
-main().catch(console.error);
+main().catch((err) => {
+  console.error(chalk.red(`error: ${err.message}`));
+  process.exit(1);
+});
