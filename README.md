@@ -97,7 +97,7 @@ Your config lives at `~/.config/lazy-commit/config.json`:
 {
   "apiKey": "sk-...",
   "instructions": "always use conventional commits: feat, fix, chore, docs, refactor. keep messages short and clear.",
-  "prefix": "arii"
+  "prefix": "ary-na"
 }
 ```
 
@@ -139,4 +139,4 @@ npm run build
 
 ## license
 
-mit © [ariian](https://github.com/ary-na)
+mit © [arii.dev](https://arii.dev)
