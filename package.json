@@ -1,0 +1,30 @@
+{
+  "name": "@ariian/lazy-commit",
+  "version": "1.0.0",
+  "description": "AI-powered git commit message generator",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "lazy-commit": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "keywords": [
+    "git",
+    "commit",
+    "ai",
+    "cli"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.19.19",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "openai": "^6.37.0"
+  }
+}

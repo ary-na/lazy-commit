@@ -1,0 +1,22 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+
+# environment
+.env
+.env.local
+
+# config (never commit your api key)
+.config/
+
+# os
+.DS_Store
+
+# logs
+*.log
+npm-debug.log*
+
+# typescript
+*.tsbuildinfo
