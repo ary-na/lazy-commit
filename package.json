@@ -19,6 +19,11 @@
     "cli"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ary-na/lazy-commit.git"
+  },
+  "homepage": "https://github.com/ary-na/lazy-commit#readme",
   "devDependencies": {
     "@types/node": "^22.19.19",
     "tsx": "^4.0.0",
