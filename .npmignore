@@ -1,6 +1,20 @@
-src
-node_modules
-.gitignore
-.npmignore
+# source files (dist is enough)
+src/
+
+# typescript config
 tsconfig.json
+
+# os
+.DS_Store
+
+# logs
+*.log
+npm-debug.log*
+
+# git
+.git/
+.gitignore
+
+# dev
+node_modules/
 package-lock.json
