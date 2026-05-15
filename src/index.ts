@@ -15,6 +15,8 @@ async function main() {
     process.exit(0);
   }
 
+  const dryRun = args.includes("--dry-run");
+
   const diff = getStagedDiff();
 
   if (!diff.trim()) {
@@ -32,6 +34,14 @@ async function main() {
   );
 
   const commitMessage = await generateCommitMessage(diff, config);
+
+  if (dryRun) {
+    console.log(chalk.bold("suggested commit message:\n"));
+    console.log(chalk.cyan(`  ${commitMessage}\n`));
+    console.log(chalk.yellow("dry run — nothing was committed."));
+    process.exit(0);
+  }
+
   const accepted = await confirmCommit(commitMessage);
 
   if (accepted) {
