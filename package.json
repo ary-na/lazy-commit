@@ -4,6 +4,10 @@
   "description": "AI-powered git commit message generator",
   "type": "module",
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "bin": {
     "lazy-commit": "dist/index.js"
   },
@@ -21,7 +25,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ary-na/lazy-commit.git"
+    "url": "git+https://github.com/ary-na/lazy-commit.git"
   },
   "homepage": "https://github.com/ary-na/lazy-commit#readme",
   "devDependencies": {
