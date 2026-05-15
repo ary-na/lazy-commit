@@ -1,6 +1,6 @@
 {
   "name": "@ariian/lazy-commit",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "AI-powered git commit message generator",
   "type": "module",
   "main": "dist/index.js",
