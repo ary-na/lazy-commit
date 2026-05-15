@@ -6,7 +6,10 @@ import * as readline from "readline";
 const CONFIG_DIR = path.join(os.homedir(), ".config", "lazy-commit");
 const CONFIG_FILE = path.join(CONFIG_DIR, "config.json");
 
+export type Provider = "openai" | "anthropic" | "groq";
+
 export interface Config {
+  provider: Provider;
   apiKey: string;
   instructions?: string;
   prefix?: string;
@@ -21,7 +24,6 @@ export function loadConfig(): Config {
     console.error("no config found. run: lazy-commit config");
     process.exit(1);
   }
-
   const raw = fs.readFileSync(CONFIG_FILE, "utf-8");
   return JSON.parse(raw) as Config;
 }
@@ -30,7 +32,6 @@ export function saveConfig(config: Config): void {
   if (!fs.existsSync(CONFIG_DIR)) {
     fs.mkdirSync(CONFIG_DIR, { recursive: true });
   }
-
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
 }
 
@@ -39,7 +40,6 @@ function prompt(question: string): Promise<string> {
     input: process.stdin,
     output: process.stdout,
   });
-
   return new Promise((resolve) => {
     rl.question(question, (answer) => {
       rl.close();
@@ -53,12 +53,25 @@ export async function runConfigSetup(): Promise<void> {
 
   const existing = configExists() ? loadConfig() : ({} as Partial<Config>);
 
+  const providerAnswer = await prompt(
+    `ai provider - openai, anthropic, groq${existing.provider ? ` (current: ${existing.provider})` : ""}: `,
+  );
+
+  const provider = (providerAnswer.trim() ||
+    existing.provider ||
+    "openai") as Provider;
+
+  if (!["openai", "anthropic", "groq"].includes(provider)) {
+    console.error("invalid provider. choose openai, anthropic, or groq.");
+    process.exit(1);
+  }
+
   const apiKey = await prompt(
-    `openai api key${existing.apiKey ? " (press enter to keep existing)" : ""}: `,
+    `api key for ${provider}${existing.apiKey ? " (press enter to keep existing)" : ""}: `,
   );
 
   const instructions = await prompt(
-    `custom instructions${existing.instructions ? " (press enter to keep existing)" : ""}: `,
+    `custom instructions e.g. "always use feat:, fix:, chore:"${existing.instructions ? " (press enter to keep existing)" : ""}: `,
   );
 
   const prefix = await prompt(
@@ -66,17 +79,17 @@ export async function runConfigSetup(): Promise<void> {
   );
 
   const config: Config = {
+    provider,
     apiKey: apiKey.trim() || existing.apiKey || "",
     instructions: instructions.trim() || existing.instructions || "",
     prefix: prefix.trim() || existing.prefix || "",
   };
 
-  if (!config.apiKey.startsWith("sk-")) {
-    console.error("invalid openai api key.");
+  if (!config.apiKey) {
+    console.error("api key is required.");
     process.exit(1);
   }
 
   saveConfig(config);
-
   console.log(`\nconfig saved to ${CONFIG_FILE}`);
 }

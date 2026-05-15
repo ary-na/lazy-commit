@@ -1,66 +1,11 @@
 #!/usr/bin/env node
 
-import OpenAI from "openai";
 import { execSync } from "child_process";
-import * as readline from "readline";
 import chalk from "chalk";
 import { loadConfig, runConfigSetup } from "./config.js";
-
-function getStagedDiff(): string {
-  try {
-    const diff = execSync("git diff --staged", { encoding: "utf-8" });
-    return diff;
-  } catch {
-    console.error(
-      chalk.red("error: not a git repository or git is not installed"),
-    );
-    process.exit(1);
-  }
-}
-
-async function generateCommitMessage(diff: string): Promise<string> {
-  const config = loadConfig();
-
-  const client = new OpenAI({ apiKey: config.apiKey });
-
-  const prefixNote = config.prefix
-    ? `prefix every commit message with "${config.prefix}:"`
-    : "";
-  const instructions = [config.instructions, prefixNote]
-    .filter(Boolean)
-    .join(". ");
-
-  const systemPrompt = `You are a git commit message generator. Generate concise commit messages in conventional commits format.${instructions ? ` ${instructions}.` : ""} Reply with only the commit message, nothing else.`;
-
-  const response = await client.chat.completions.create({
-    model: "gpt-4o-mini",
-    max_tokens: 256,
-    messages: [
-      { role: "system", content: systemPrompt },
-      {
-        role: "user",
-        content: `Generate a commit message for this diff:\n\n${diff}`,
-      },
-    ],
-  });
-
-  const content = response.choices[0].message.content;
-  if (!content) throw new Error("unexpected response from api");
-  return content.trim();
-}
-
-function prompt(question: string): Promise<string> {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve(answer);
-    });
-  });
-}
+import { getStagedDiff } from "./git.js";
+import { confirmCommit } from "./prompt.js";
+import { generateCommitMessage } from "./providers/index.js";
 
 async function main() {
   const args = process.argv.slice(2);
@@ -81,16 +26,15 @@ async function main() {
     process.exit(0);
   }
 
-  console.log(chalk.dim("generating commit message...\n"));
+  const config = loadConfig();
+  console.log(
+    chalk.dim(`generating commit message using ${config.provider}...\n`),
+  );
 
-  const commitMessage = await generateCommitMessage(diff);
+  const commitMessage = await generateCommitMessage(diff, config);
+  const accepted = await confirmCommit(commitMessage);
 
-  console.log(chalk.bold("suggested commit message:\n"));
-  console.log(chalk.cyan(`  ${commitMessage}\n`));
-
-  const answer = await prompt(chalk.white("use this message? (y/n): "));
-
-  if (answer.toLowerCase() === "y") {
+  if (accepted) {
     execSync(`git commit -m "${commitMessage.replace(/"/g, '\\"')}"`, {
       stdio: "inherit",
     });
