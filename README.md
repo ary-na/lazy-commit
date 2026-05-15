@@ -18,6 +18,8 @@ Writing commit messages is boring. So this tool automates it properly.
 - AI-generated commit messages from your real diff
 - conventional commits format by default
 - one-command workflow
+- multi-provider support (openai, anthropic, groq)
+- `--dry-run` flag to preview without committing
 - custom instructions support
 - always asks before committing — safe by design
 
@@ -43,7 +45,8 @@ You'll be prompted for:
 
 | field | description |
 |---|---|
-| `apiKey` | your OpenAI API key (`sk-...`) |
+| `provider` | ai provider — `openai`, `anthropic`, or `groq` |
+| `apiKey` | your api key for the chosen provider |
 | `instructions` | custom commit rules (optional) |
 | `prefix` | optional tag added to every commit |
 
@@ -65,6 +68,14 @@ Then choose:
 - `y` → accept and commit
 - `n` → cancel
 
+### dry run
+
+Preview the suggested message without committing:
+
+```bash
+lazy-commit --dry-run
+```
+
 ---
 
 ## example
@@ -73,9 +84,9 @@ Then choose:
 $ git add src/auth.ts
 $ lazy-commit
 
-generating commit message...
+generating commit message using openai...
 
-  suggested commit message:
+suggested commit message:
 
   fix(auth): handle token expiry edge case in refresh flow
 
@@ -95,9 +106,10 @@ Your config lives at `~/.config/lazy-commit/config.json`:
 
 ```json
 {
+  "provider": "openai",
   "apiKey": "sk-...",
   "instructions": "always use conventional commits: feat, fix, chore, docs, refactor. keep messages short and clear.",
-  "prefix": "ary-na"
+  "prefix": "arii"
 }
 ```
 
@@ -105,11 +117,21 @@ To update any setting, run `lazy-commit config` again.
 
 ---
 
+## supported providers
+
+| provider | model used | free tier |
+|---|---|---|
+| `openai` | gpt-4o-mini | no |
+| `anthropic` | claude-haiku | no |
+| `groq` | llama3-8b-8192 | yes |
+
+---
+
 ## requirements
 
 - node 18+
 - a git repository with staged changes
-- an [OpenAI API key](https://platform.openai.com/api-keys)
+- an api key for your chosen provider
 
 ---
 
