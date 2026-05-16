@@ -20,6 +20,8 @@ Writing commit messages is boring. So this tool automates it properly.
 - one-command workflow
 - multi-provider support (openai, anthropic, groq)
 - `--dry-run` flag to preview without committing
+- regenerate or edit the suggested message before committing
+- `--version` flag to check the installed version
 - custom instructions support
 - always asks before committing — safe by design
 
@@ -67,6 +69,8 @@ Then choose:
 
 - `y` → accept and commit
 - `n` → cancel
+- `r` → regenerate a new message from the AI
+- `e` → edit the message inline before committing
 
 ### dry run
 
@@ -74,6 +78,14 @@ Preview the suggested message without committing:
 
 ```bash
 lazy-commit --dry-run
+```
+
+### version
+
+Check the installed version:
+
+```bash
+lazy-commit --version
 ```
 
 ---
@@ -90,9 +102,14 @@ suggested commit message:
 
   fix(auth): handle token expiry edge case in refresh flow
 
-use this message? (y/n): y
+use this message? (y)es / (n)o / (r)egenerate / (e)dit: e
 
-[main 3f2a1c4] fix(auth): handle token expiry edge case in refresh flow
+current message: fix(auth): handle token expiry edge case in refresh flow
+edit: fix(auth): handle token expiry and add retry logic
+
+updated message: fix(auth): handle token expiry and add retry logic
+
+[main 3f2a1c4] fix(auth): handle token expiry and add retry logic
  1 file changed, 12 insertions(+), 3 deletions(-)
 
 committed!
