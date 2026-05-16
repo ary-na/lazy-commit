@@ -6,12 +6,20 @@ import { loadConfig, runConfigSetup } from "./config.js";
 import { getStagedDiff } from "./git.js";
 import { confirmCommit, editMessage } from "./prompt.js";
 import { generateCommitMessage } from "./providers/index.js";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const { version } = require("../package.json");
 
 async function main() {
   const args = process.argv.slice(2);
 
   if (args[0] === "config") {
     await runConfigSetup();
+    process.exit(0);
+  }
+
+  if (args[0] === "--version" || args[0] === "-v") {
+    console.log(version);
     process.exit(0);
   }
 
