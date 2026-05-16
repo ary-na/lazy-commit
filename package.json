@@ -2,6 +2,9 @@
   "name": "@ariian/lazy-commit",
   "version": "1.3.0",
   "description": "AI-powered git commit message generator",
+  "engines": {
+    "node": ">=18"
+  },
   "type": "module",
   "main": "dist/index.js",
   "files": [
