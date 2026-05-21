@@ -6,7 +6,7 @@ import * as readline from "readline";
 const CONFIG_DIR = path.join(os.homedir(), ".config", "lazy-commit");
 const CONFIG_FILE = path.join(CONFIG_DIR, "config.json");
 
-export type Provider = "openai" | "anthropic" | "groq";
+export type Provider = "openai" | "anthropic" | "groq" | "gemini";
 
 export interface Config {
   provider: Provider;
@@ -54,15 +54,17 @@ export async function runConfigSetup(): Promise<void> {
   const existing = configExists() ? loadConfig() : ({} as Partial<Config>);
 
   const providerAnswer = await prompt(
-    `ai provider - openai, anthropic, groq${existing.provider ? ` (current: ${existing.provider})` : ""}: `,
+    `ai provider - openai, anthropic, groq, gemini${existing.provider ? ` (current: ${existing.provider})` : ""}: `,
   );
 
   const provider = (providerAnswer.trim() ||
     existing.provider ||
     "openai") as Provider;
 
-  if (!["openai", "anthropic", "groq"].includes(provider)) {
-    console.error("invalid provider. choose openai, anthropic, or groq.");
+  if (!["openai", "anthropic", "groq", "gemini"].includes(provider)) {
+    console.error(
+      "invalid provider. choose openai, anthropic, groq, or gemini.",
+    );
     process.exit(1);
   }
 
