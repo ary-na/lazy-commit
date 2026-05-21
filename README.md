@@ -18,7 +18,7 @@ Writing commit messages is boring. So this tool automates it properly.
 - AI-generated commit messages from your real diff
 - conventional commits format by default
 - one-command workflow
-- multi-provider support (openai, anthropic, groq)
+- multi-provider support (openai, anthropic, groq, gemini)
 - `--dry-run` flag to preview without committing
 - regenerate or edit the suggested message before committing
 - `--version` flag to check the installed version
@@ -47,7 +47,7 @@ You'll be prompted for:
 
 | field | description |
 |---|---|
-| `provider` | ai provider — `openai`, `anthropic`, or `groq` |
+| `provider` | ai provider — `openai`, `anthropic`, `groq`, or `gemini` |
 | `apiKey` | your api key for the chosen provider |
 | `instructions` | custom commit rules (optional) |
 | `prefix` | optional tag added to every commit |
@@ -141,6 +141,7 @@ To update any setting, run `lazy-commit config` again.
 | `openai` | gpt-4o-mini | no |
 | `anthropic` | claude-haiku | no |
 | `groq` | llama3-8b-8192 | yes |
+| `gemini` | gemini-1.5-flash | yes |
 
 ---
 
