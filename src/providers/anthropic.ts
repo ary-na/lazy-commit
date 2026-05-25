@@ -18,6 +18,7 @@ export async function generateWithAnthropic(
       },
     ],
   });
+  if (!response.content.length) throw new Error("unexpected response from anthropic");
   const block = response.content[0];
   if (block.type !== "text")
     throw new Error("unexpected response from anthropic");

@@ -18,6 +18,7 @@ export async function generateWithOpenAI(
       },
     ],
   });
+  if (!response.choices.length) throw new Error("unexpected response from openai");
   const content = response.choices[0].message.content;
   if (!content) throw new Error("unexpected response from openai");
   return content.trim();

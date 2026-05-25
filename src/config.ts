@@ -25,7 +25,12 @@ export function loadConfig(): Config {
     process.exit(1);
   }
   const raw = fs.readFileSync(CONFIG_FILE, "utf-8");
-  return JSON.parse(raw) as Config;
+  try {
+    return JSON.parse(raw) as Config;
+  } catch {
+    console.error("config file is corrupted. run: lazy-commit config");
+    process.exit(1);
+  }
 }
 
 export function saveConfig(config: Config): void {
@@ -77,14 +82,14 @@ export async function runConfigSetup(): Promise<void> {
   );
 
   const prefix = await prompt(
-    `commit prefix e.g. "arii" (optional, press enter to skip): `,
+    `commit prefix e.g. "arii"${existing.prefix ? ` (current: ${existing.prefix})` : ""} (optional, press enter to skip/clear): `,
   );
 
   const config: Config = {
     provider,
     apiKey: apiKey.trim() || existing.apiKey || "",
     instructions: instructions.trim() || existing.instructions || "",
-    prefix: prefix.trim() || existing.prefix || "",
+    prefix: prefix.trim(),
   };
 
   if (!config.apiKey) {

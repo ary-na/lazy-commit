@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import chalk from "chalk";
+import ora from "ora";
 import { loadConfig, runConfigSetup } from "./config.js";
 import { getStagedDiff } from "./git.js";
 import { confirmCommit, editMessage } from "./prompt.js";
@@ -9,6 +10,25 @@ import { generateCommitMessage } from "./providers/index.js";
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
 const { version } = require("../package.json");
+
+function parseDiffStats(diff: string) {
+  const files = (diff.match(/^diff --git/gm) || []).length;
+  const additions = (diff.match(/^\+(?!\+\+)/gm) || []).length;
+  const deletions = (diff.match(/^-(?!--)/gm) || []).length;
+  return { files, additions, deletions };
+}
+
+async function generate(diff: string, config: ReturnType<typeof loadConfig>) {
+  const spinner = ora(chalk.dim(`generating with ${config.provider}...`)).start();
+  try {
+    const msg = await generateCommitMessage(diff, config);
+    spinner.succeed(chalk.dim(`generated with ${config.provider}`));
+    return msg;
+  } catch (err) {
+    spinner.fail(chalk.dim(`failed to generate with ${config.provider}`));
+    throw err;
+  }
+}
 
 async function main() {
   const args = process.argv.slice(2);
@@ -24,58 +44,44 @@ async function main() {
   }
 
   const dryRun = args.includes("--dry-run");
-
   const diff = getStagedDiff();
 
   if (!diff.trim()) {
-    console.log(
-      chalk.yellow(
-        "no staged changes found. use git add to stage your changes.",
-      ),
-    );
+    console.log(chalk.yellow("no staged changes found. use git add to stage your changes."));
     process.exit(0);
   }
 
+  const stats = parseDiffStats(diff);
   const config = loadConfig();
-  console.log(
-    chalk.dim(`generating commit message using ${config.provider}...\n`),
-  );
-
-  let commitMessage = await generateCommitMessage(diff, config);
+  let commitMessage = await generate(diff, config);
 
   if (dryRun) {
-    console.log(chalk.bold("suggested commit message:\n"));
-    console.log(chalk.cyan(`  ${commitMessage}\n`));
-    console.log(chalk.yellow("dry run — nothing was committed."));
+    console.log(chalk.cyan(`\n  ${commitMessage}`));
+    console.log(chalk.dim(`\n  ${stats.files} ${stats.files === 1 ? "file" : "files"}  ${chalk.green(`+${stats.additions}`)}  ${chalk.red(`-${stats.deletions}`)}`));
+    console.log(chalk.yellow("\n  dry run — nothing was committed."));
     process.exit(0);
   }
 
   while (true) {
-    const action = await confirmCommit(commitMessage);
+    const action = await confirmCommit(commitMessage, stats);
 
     if (action === "commit") {
-      execSync(`git commit -m "${commitMessage.replace(/"/g, '\\"')}"`, {
-        stdio: "inherit",
-      });
-      console.log(chalk.green("\ncommitted!"));
+      execFileSync("git", ["commit", "-m", commitMessage], { stdio: "inherit" });
+      console.log(chalk.green("\n  ✔ committed"));
       break;
     } else if (action === "regenerate") {
-      console.log(chalk.dim("\nregenerating...\n"));
-      commitMessage = await generateCommitMessage(diff, config);
+      commitMessage = await generate(diff, config);
     } else if (action === "edit") {
-      console.log(chalk.dim("\ncurrent message: ") + chalk.cyan(commitMessage));
       commitMessage = await editMessage(commitMessage);
-      console.log(
-        chalk.dim("\nupdated message: ") + chalk.cyan(commitMessage) + "\n",
-      );
     } else {
-      console.log(chalk.red("\ncommit cancelled."));
+      console.log(chalk.dim("\n  cancelled."));
       break;
     }
   }
 }
 
 main().catch((err) => {
-  console.error(chalk.red(`error: ${err.message}`));
+  const message = err instanceof Error ? err.message : String(err);
+  console.error(chalk.red(`\n  error: ${message}`));
   process.exit(1);
 });

@@ -18,6 +18,7 @@ export async function generateWithGroq(
       },
     ],
   });
+  if (!response.choices.length) throw new Error("unexpected response from groq");
   const content = response.choices[0].message.content;
   if (!content) throw new Error("unexpected response from groq");
   return content.trim();
