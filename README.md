@@ -50,7 +50,7 @@ You'll be prompted for:
 | `provider` | ai provider — `openai`, `anthropic`, `groq`, or `gemini` |
 | `apiKey` | your api key for the chosen provider |
 | `instructions` | custom commit rules (optional) |
-| `prefix` | optional tag added to every commit |
+| `prefix` | optional tag added to every commit (press enter to skip or clear) |
 
 Config is stored at `~/.config/lazy-commit/config.json`.
 
@@ -65,12 +65,14 @@ git add .
 lazy-commit
 ```
 
-Then choose:
+You'll see the suggested message with diff stats, then choose:
 
-- `y` → accept and commit
-- `n` → cancel
-- `r` → regenerate a new message from the AI
-- `e` → edit the message inline before committing
+| key | action |
+|---|---|
+| `y` or `yes` | accept and commit |
+| `e` or `edit` | edit the message inline before committing |
+| `r` or `regenerate` | generate a new message from the AI |
+| `n` or anything else | cancel |
 
 ### dry run
 
@@ -96,23 +98,26 @@ lazy-commit --version
 $ git add src/auth.ts
 $ lazy-commit
 
-generating commit message using openai...
-
-suggested commit message:
+✔ generated with openai
 
   fix(auth): handle token expiry edge case in refresh flow
+  1 file  +12  -3
 
-use this message? (y)es / (n)o / (r)egenerate / (e)dit: e
+  [y] commit   [e] edit   [r] regenerate   [n] cancel
+  › e
 
-current message: fix(auth): handle token expiry edge case in refresh flow
-edit: fix(auth): handle token expiry and add retry logic
+  edit › fix(auth): handle token expiry and add retry logic
 
-updated message: fix(auth): handle token expiry and add retry logic
+  fix(auth): handle token expiry and add retry logic
+  1 file  +12  -3
+
+  [y] commit   [e] edit   [r] regenerate   [n] cancel
+  › y
 
 [main 3f2a1c4] fix(auth): handle token expiry and add retry logic
  1 file changed, 12 insertions(+), 3 deletions(-)
 
-committed!
+  ✔ committed
 ```
 
 ---
@@ -126,7 +131,7 @@ Your config lives at `~/.config/lazy-commit/config.json`:
   "provider": "openai",
   "apiKey": "sk-...",
   "instructions": "always use conventional commits: feat, fix, chore, docs, refactor. keep messages short and clear.",
-  "prefix": "arii"
+  "prefix": "example"
 }
 ```
 
@@ -179,4 +184,4 @@ npm run build
 
 ## license
 
-mit © [arii.dev](https://arii.dev)
+MIT © Arian Najafi Yamchelo — [arii.dev](https://arii.dev)
